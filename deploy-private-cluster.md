@@ -17,35 +17,40 @@
 - 緑文字で書かれている部分は、プライベートAKSクラスタにするか否かの変更点です。（プライベートAKSクラスタ＝k8s Master APIをPrivate EndpointによりVNET内に引き込んだ形態。）
 
 # 0. 準備作業
-サブスクリプションの選択
+
+- サブスクリプションの選択
+- パラメータ-の設定
 - az コマンド拡張のインストール
 - AKS プレビュー機能のインストール
  
-## Select Subscription
+## サブスクリプションの選択
 
 ```bash
 SUBSCRIPTION_NAME=nakama-subscription03
-az account set -s $SUBSCRIPTION_NAME
-SUBSCRIPTION_ID=$(az account show -s $SUBSCRIPTION_NAME --query id -o tsv)
+az account set -s "$SUBSCRIPTION_NAME"
+SUBSCRIPTION_ID=$(az account show -s "$SUBSCRIPTION_NAME" --query id -o tsv)
 ```
 
-## Parameters ★ NAME_PREFIXは各自で書き換えてください（名前重複防止）
+## パラメータ-の設定
+
+※NAME_PREFIXは各自で書き換えてください（名前重複防止）
 
 ```bash
 NAME_PREFIX=azrefarc7
 LOCATION=japaneast
 ```
  
-## Install az extensions
+## az コマンド拡張のインストール
 
 ```bash
-# az extension list-available --output table
+# 利用可能な拡張の一覧
+az extension list-available --output table
 az extension add --name application-insights
 az extension add --name aks-preview
 az extension add --name azure-firewall
 ```
  
-## Install AKS Private Link Preview
+## AKS プレビュー機能のインストール
 
 ```bash
 # ※ 時間かかるので注意（20 分ぐらい）
@@ -125,13 +130,14 @@ az network vnet subnet create --name $ONP_VNET_SUBNET_DEF_NAME --address-prefix 
 az network vnet subnet create --name $ONP_VNET_SUBNET_IES_NAME --address-prefix $ONP_VNET_SUBNET_IES_ADDRESS_PREFIX --resource-group $RG_ONP --vnet-name $ONP_VNET_NAME
  
 # Create uservm1 (Public IP + Open RDP Port)
-# Publisher:Offer:Sku:Version
-# az vm image list --publisher MicrosoftWindowsDesktop --offer Windows-10 --sku 19h2 --all -o tsv
 # Visual Studio のアクティブサブスクライバでない場合には OS イメージとして Windows 10 ではなく Windows Server 2019 を利用すること（--image Win2019Datacenter を指定）
+# イメージ名の一覧
+# az vm image list --publisher MicrosoftWindowsDesktop --offer Windows-10 --sku 19h2 --all -o tsv
 az network public-ip create --name uservm1-ip --resource-group $RG_ONP --sku Standard
 ONP_VNET_SUBNET_DEF_ID=$(az network vnet subnet show --resource-group $RG_ONP --vnet-name $ONP_VNET_NAME --name $ONP_VNET_SUBNET_DEF_NAME --query id -o tsv)
 az network nic create --name uservm1nic --subnet $ONP_VNET_SUBNET_DEF_ID --resource-group $RG_ONP --location $LOCATION --public-ip-address uservm1-ip
-az vm create --name uservm1 --image "MicrosoftWindowsDesktop:Windows-10:19h2-ent:18363.720.2003120536" --admin-username azrefadmin --admin-password "p&ssw0rdp&ssw0rd" --nics uservm1nic --resource-group $RG_ONP --location $LOCATION
+# --image は Publisher:Offer:Sku:Version の形式で指定
+az vm create --name uservm1 --image "MicrosoftWindowsDesktop:Windows-10:19h2-ent:18363.720.2003120536" --admin-username azrefadmin --admin-password "p&ssw0rdp&ssw0rd" --nics uservm1nic --resource-group $RG_ONP --location $LOCATION --size Standard_D2_v3
 az vm open-port --resource-group $RG_ONP --name uservm1 --port 3389
 ```
 
@@ -397,7 +403,7 @@ az network firewall application-rule create  --firewall-name $FW_NAME --resource
 # Create mgmt-win-vm1
  
 # VM 作成 (Windows 2019)
-az vm create --name $MGMT_WIN_VM_NAME --image Win2019Datacenter --admin-username azrefadmin --admin-password "p&ssw0rdp&ssw0rd" --nics $MGMT_WIN_VM_NIC_NAME --resource-group $RG_AKS --location $LOCATION
+az vm create --name $MGMT_WIN_VM_NAME --image Win2019Datacenter --admin-username azrefadmin --admin-password "p&ssw0rdp&ssw0rd" --nics $MGMT_WIN_VM_NIC_NAME --resource-group $RG_AKS --location $LOCATION --size Standard_D2_v3
 az vm open-port --resource-group $RG_AKS --name $MGMT_WIN_VM_NAME --port 3389
  
 # Private Link Service 作成
@@ -419,7 +425,7 @@ az aks get-versions --location $LOCATION --query 'orchestrators[?!isPreview] | [
 
 ### VM に RDP 接続してツールをインストール
 
-- userpc1 で mstsc を起動、10.0.250.4 へ RDP 接続
+- uservm1 で mstsc を起動、10.0.250.4 へ RDP 接続
  
 #### 1. az CLI インストール
 
@@ -462,8 +468,8 @@ helm.exe を c:\users\<username> にコピー
 
 https://code.visualstudio.com/download から System Installer 64bit を落としてコピーで持ち込み
  
-#### 5. Google Chrome
-https://www.google.com/chrome/?standalone=1&platform=win64
+#### 5. Microsoft Edge(Chromium 版)
+https://www.microsoft.com/en-us/edge/business/download
 からオフラインインストーラをダウンロードしてコピーで持ち込み
  
 
@@ -526,12 +532,14 @@ az network firewall application-rule create  --firewall-name $FW_NAME --resource
 --target-fqdns "*.cdn.mscr.io" "mcr.microsoft.com" "*.data.mcr.microsoft.com"
  
 # Create mgmt-linux-vm1 (Ubuntu)
-az vm create --name $MGMT_LINUX_VM_NAME --image UbuntuLTS --admin-username azrefadmin --admin-password "p&ssw0rdp&ssw0rd" --nics $MGMT_LINUX_VM_NIC_NAME --resource-group $RG_AKS --location $LOCATION --generate-ssh-keys
+az vm create --name $MGMT_LINUX_VM_NAME --image UbuntuLTS --admin-username azrefadmin --admin-password "p&ssw0rdp&ssw0rd" --nics $MGMT_LINUX_VM_NIC_NAME --resource-group $RG_AKS --location $LOCATION --generate-ssh-keys --size Standard_D2_v3
 ```
 
 ### VM に ssh してツールをインストール
 
 #### 0. VM にログイン
+
+Windows 保守端末 からログインする。
 
 `ssh mgmt-linux-vm1`
 
@@ -625,7 +633,6 @@ az network firewall network-rule create --firewall-name $FW_NAME --resource-grou
  
 # Create AKS Cluster ==============================================
 # ※ Azure AD 統合は Azure AD テナントの管理者の同意が必要なため、以下では実施していない
-★ Managed ID 方式に変更
  
 # Prepare for creating cluster
 AKS_VERSION=$(az aks get-versions --location $LOCATION --query 'orchestrators[?!isPreview] | [-1].orchestratorVersion' --output tsv)
@@ -635,7 +642,6 @@ AKS_VNET_SUBNET_NPS_ID=$(az network vnet subnet show --resource-group $RG_AKS --
 # ELB を作成しないように --outbound-type userDefinedRouting を指定
 # プライベートクラスタを作成する場合は --enable-private-cluster を付与
 # 非プライベート AKS クラスタを利用する場合は --enable-private-cluster を外す
-# 実行時に 'Bad Request' The credentials in Service PrincipalProfile were invalid エラーが出た場合には、同一コマンドを再実行する（SPN 作成とのタイムラグの関係によるもの）
 # Managed ID 方式を使う場合には、--service-principal, --client-secret のかわりに --enable-managed-identity を指定
 az aks create --resource-group $RG_AKS --name $AKS_CLUSTER_NAME --vm-set-type VirtualMachineScaleSets --load-balancer-sku standard --location $LOCATION --kubernetes-version $AKS_VERSION --network-plugin azure --vnet-subnet-id $AKS_VNET_SUBNET_NPS_ID --service-cidr $AKS_SERVICE_CIDR --dns-service-ip $AKS_DNS_SERVICE_IP --docker-bridge-address 172.17.0.1/16 --generate-ssh-keys --outbound-type userDefinedRouting --enable-private-cluster  --enable-managed-identity
  
@@ -653,6 +659,8 @@ az aks update --name $AKS_CLUSTER_NAME --resource-group $RG_AKS --attach-acr $AC
  
 # Azure Monitor for AKS 有効化
 DIAG_LA_WS_RESOURCE_ID=$(az monitor log-analytics workspace show --resource-group $RG_OPS --workspace-name $DIAG_LA_WS_NAME --query id -o tsv)
+# 以下のエラーが出た場合は、Azure CLI のバージョンを変更してトライしてみる。
+# The request content was invalid and could not be deserialized: 'Could not find member 'template' on object of type 'DeploymentDefinition'. Path 'template', line 1, position 12.'.
 az aks enable-addons --addons monitoring --name $AKS_CLUSTER_NAME --resource-group $RG_AKS --workspace-resource-id $DIAG_LA_WS_RESOURCE_ID
  
 # AKS 診断設定の有効化
@@ -709,12 +717,13 @@ az network firewall application-rule create  --firewall-name $FW_NAME --resource
 FW_PUBLIC_IP_ADDRESS=$(az network public-ip show --name $FW_PUBLIC_IP_NAME --resource-group $RG_AKS --query ipAddress -o tsv)
  
 az aks update --name $AKS_CLUSTER_NAME --resource-group $RG_AKS --api-server-authorized-ip-ranges  ${FW_PUBLIC_IP_ADDRESS}/32
+# ================================================
 ```
 
 # 6. アプリケーションの配置
 
 - kubectl/kubeconfig の準備
-  - userpc1 > mgmt-win-vm1 へのログイン
+  - uservm1 > mgmt-win-vm1 へのログイン
   - ~/.kube/config ファイルの取得とコピー（非 admin, admin の 2 種類）
 - コンテナイメージの作成
   - アプリケーションバイナリを mgmt-windows-vm1 に持ち込み
@@ -727,7 +736,7 @@ az aks update --name $AKS_CLUSTER_NAME --resource-group $RG_AKS --api-server-aut
 
 ## 6-a. mgmt-win-vm1 上で作業
 
-※ userpc1 で mstsc を起動、10.0.250.4 へ RDP 接続
+※ uservm1 で mstsc を起動、10.0.250.4 へ RDP 接続
 
 ```cmd
 rem cmd を開いてホームに移動
@@ -757,8 +766,8 @@ sudo az login
  
 # Select Subscription
 SUBSCRIPTION_NAME=nakama-vnext
-sudo az account set -s $SUBSCRIPTION_NAME
-SUBSCRIPTION_ID=$(az account show -s $SUBSCRIPTION_NAME --query id -o tsv)
+sudo az account set -s "$SUBSCRIPTION_NAME"
+SUBSCRIPTION_ID=$(az account show -s "$SUBSCRIPTION_NAME" --query id -o tsv)
  
 NAME_PREFIX=azrefarc1
 LOCATION=japaneast
@@ -771,11 +780,11 @@ sudo mv .kube/config .kube/admin-config
 sudo az aks get-credentials --resource-group $RG_AKS --name $AKS_CLUSTER_NAME
 ```
 
-### 6-c. コンテナイメージの作成
+## 6-c. コンテナイメージの作成
 
 <<AKS用サンプルアプリ.zip>>
 
-### 6-d. Cloud Shell 上で実施
+## 6-d. Cloud Shell 上で実施
 
 ```bash
 # コンテナをビルドできるようにレポジトリへの通信を解放
@@ -787,7 +796,7 @@ az network firewall application-rule create  --firewall-name $FW_NAME --resource
 --target-fqdns "repo.maven.apache.org" "repo.spring.io" "dl.bintray.com"
 ```
 
-### 6-e. mgmt-windows-vm1 上で実施
+## 6-e. mgmt-windows-vm1 上で実施
 
 ```cmd
 # C:\Users\azrefadmin\AzRefArc.SpringBoot 下にファイルを展開
@@ -822,7 +831,7 @@ sudo docker push ${ACR_NAME}.azurecr.io/azrefarc.springboot:1
 sudo docker push ${ACR_NAME}.azurecr.io/azrefarc.springboot:2
 ```
 
-### 6-f. アプリケーションの配置
+## 6-f. アプリケーションの配置
 
 ※mgmt-win-vm1 上で作業
 
