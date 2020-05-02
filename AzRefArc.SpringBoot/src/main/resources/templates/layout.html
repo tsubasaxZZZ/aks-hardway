@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="utf-8" />
+    <title>Spring Boot サンプルアプリケーション</title>
+    <meta name="viewport" content="width=device-width, intial-scale=1.0" />
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+	<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+	<script type="text/javascript">
+	    $(function () {
+	        $.ajaxSetup({
+	            cache: false,
+	            error: function (xhr, status, err) { alert("通信エラーが発生しました。"); } // 集約通信例外ハンドラ
+	        });
+	
+	        window.onerror = function (message, url, lineNumber) {
+	            console.log(message);
+	            var msg = "処理中にエラーが発生しました。" + message;
+	            alert(msg);
+	            return true;
+	        };
+	    });
+	</script>
+
+	<th:block layout:fragment="layout-libraries">
+	</th:block>
+
+    <style type="text/css">
+        @media only screen and (min-width : 768px) {
+            html {
+                position: relative;
+                height: 100%;
+            }
+            body {
+                height: 100%;
+                padding-top: 50px;
+                padding-bottom: 50px;
+            }
+            .contentWrapper {
+                overflow: auto;
+                height: 100%;
+            }
+            .contentBody {
+                padding-top: 10px;
+                padding-bottom: 10px;
+                min-height: 100%;
+            }
+            .footer {
+                position: fixed;
+                bottom: 0;
+                margin-bottom: 0;
+                width: 100%;
+                height: 50px;
+                background-color: #f5f5f5;
+            }
+            .navbar-custom-responsive {
+                position: fixed;
+                width:100%;
+                top:0px;
+                border-width: 0 0 1px 0;
+            }
+        }
+        @media only screen and (min-width : 0px) {
+            html {
+            }
+            body {
+            }
+            .contentWrapper {
+            }
+            .contentBody {
+                padding-top: 10px;
+                padding-bottom: 10px;
+            }
+            .footer {
+                bottom: 0;
+                margin-bottom: 0;
+                width: 100%;
+                height: 50px;
+                background-color: #f5f5f5;
+            }
+            .navbar-custom-responsive {
+                margin-bottom: 0px;
+            }
+        }
+    </style>
+
+	<th:block layout:fragment="layout-styles">
+	</th:block>
+
+</head>
+<body>
+    <nav class="navbar navbar-static-top navbar-default navbar-custom-responsive" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/"><span class="glyphicon glyphicon-leaf"></span>&nbsp;&nbsp;Spring Boot サンプルアプリケーション</a>
+                <button type="button" class="navbar-toggle" data-target="#navbar" data-toggle="collapse">
+                    <span class="sr-only">ナビゲーションの表示</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="contentWrapper">
+        <div class="container contentBody">
+
+			<th:block layout:fragment="layout-body">
+			    <p>Default layout content</p>
+			</th:block>
+
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="text-right" style="padding-top: 13px; padding-right: 20px; ">
+            &copy; 2018 Microsoft Corporation. All rights reserved.
+        </div>
+    </footer>
+
+	<th:block layout:fragment="layout-scripts">
+	</th:block>
+</body>
+</html>
+
