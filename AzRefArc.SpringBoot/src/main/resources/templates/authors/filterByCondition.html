@@ -1,0 +1,163 @@
+﻿
+<div layout:decorator="layout">
+	<th:block layout:fragment="layout-libraries">
+	</th:block>
+
+	<th:block layout:fragment="layout-styles">
+		<style type="text/css">
+		    @media only screen and (min-width : 0px) and (max-width : 767px) {
+		    }
+		
+		    @media only screen and (min-width : 768px) and (max-width : 991px) {
+		        dl {
+		            width: 738px; /* 750-12 */
+		            margin: 6px;
+		        }
+		
+		        dl dt {
+		            float: left;
+		        }
+		
+		        dl dd {
+		            margin-left: 200px;
+		        }
+		    }
+		
+		    @media only screen and (min-width : 992px) and (max-width : 1199px) {
+		        dl {
+		            width: 958px; /* 970-12 */
+		            margin: 6px;
+		        }
+		
+		        dl dt {
+		            float: left;
+		        }
+		
+		        dl dd {
+		            margin-left: 200px;
+		        }
+		    }
+		
+		    @media only screen and (min-width : 1200px) {
+		        dl {
+		            width: 1158px; /* 1170-12 */
+		            margin: 6px;
+		        }
+		
+		        dl dt {
+		            float: left;
+		        }
+		
+		        dl dd {
+		            margin-left: 200px;
+		        }
+		    }
+		
+		    /* エラーメッセージ用 */
+		    /* jQuery unobtrusive validation 用 */
+		    .field-validation-error {
+		        color: #ff0000;
+		    }
+		
+		    .field-validation-valid {
+		        display: none;
+		    }
+		
+		    .input-validation-error {
+		        border: 2px solid #ff0000;
+		        background-color: #ffeeee;
+		    }
+		
+		    .validation-summary-errors {
+		        font-weight: bold;
+		        color: #ff0000;
+		    }
+		
+		    .validation-summary-valid {
+		        display: none;
+		    }
+		
+		    /* jQuery Validation 用 */
+		    .error { 
+		        color:red 
+		    }
+		    input.error, select.error, textarea.error {
+		        border: 2px solid red;
+		        background-color: #ffeeee;
+		    }
+		</style>
+	</th:block>
+
+    <th:block layout:fragment="layout-body">
+		<h4>検索条件を指定してください。</h4>
+		
+		<form th:object="${findConditionViewModel}" action="/authors/filterByCondition" method="post">
+			
+			<dl>
+		        <dt><input name="EnabledState" type="checkbox" th:checked="*{EnabledState}" /> 州による検索</dt>
+		        <dd>
+		            <select name="State">
+		            	<option value=""></option>
+		            	<option th:each="obj:${states}" th:value="${obj.key}" th:text="${obj.value}" th:selected="${obj.key == findConditionViewModel.State}"></option>
+					</select>
+			    </dd>
+			</dl>
+		    <dl>
+		        <dt><input name="EnabledPhone" type="checkbox" th:checked="*{EnabledPhone}" /> 電話番号による検索</dt>
+		        <dd><input name="Phone" type="text" th:value="${Phone}" /></dd>
+		    </dl>
+		    <dl>
+		        <dt><input name="EnabledContract" type="checkbox" th:checked="*{EnabledContract}" /> 契約有無による検索</dt>
+		        <dd>
+		            <select id="Contract" name="Contract">
+						<option value="" th:selected="${findConditionViewModel.Contract} == ''"></option>
+						<option value="true" th:selected="${findConditionViewModel.Contract} == 'true'">契約あり</option>
+						<option value="false" th:selected="${findConditionViewModel.Contract} == 'false'">契約なし</option>
+		            </select>
+		        </dd>
+		    </dl>
+		    <dl>
+		        <dt><input name="EnabledAuFname" type="checkbox" th:checked="*{EnabledAuFname}" /> 著者名（名）による検索</dt>
+		        <dd><input name="AuFname" type="text" th:value="*{AuFname}" /></dd>
+		    </dl>
+		    <p>
+		        <input type="submit" value="検索" />
+		    </p>
+			<div th:if="${#fields.hasAnyErrors()}" class="validation-summary-errors">
+				<p>入力にエラーがあります。修正してください。</p>
+				<ul th:object="${findConditionViewModel}">
+					<li th:each="error:${#fields.detailedErrors()}" th:text="${error.message}" />
+				</ul>
+			</div>
+		</form>			
+		
+		<hr />
+	
+        <table th:if="${authors}" class="table table-condensed table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>著者ID</th>
+                    <th>著者名</th>
+                    <th>電話番号</th>
+                    <th>州</th>
+                    <th>契約有無</th>
+                </tr>
+            </thead>
+            <tbody>
+                    <tr th:each="obj:${authors}">
+                        <td th:text="${obj.AuthorId}"></td>
+                        <td th:text="${obj.AuthorFirstName} + ' ' + ${obj.AuthorLastName}"></td>
+                        <td th:text="${obj.Phone}"></td>
+                        <td th:text="${obj.State}"></td>
+                        <td><input type="checkbox" disabled th:checked="${obj.Contract}"　th:text="${obj.Contract} ? ' 契約あり' : ' 契約なし'"　/></td>
+                    </tr>
+            </tbody>
+        </table>
+
+		<p>
+		    <a href="/">業務メニューに戻る</a>
+		</p>
+	</th:block>
+</div>
+
+

@@ -1,0 +1,23 @@
+﻿<div layout:decorator="layout">
+    <th:block layout:fragment="layout-styles">
+	    <style type="text/css">
+	        div.row ul {
+	            padding-left: 30px
+	        }
+	            /* 箇条書きの字下げ幅を変更 */
+	            div.row ul ul {
+	                padding-left: 20px
+	            }
+	        /* 箇条書きの字下げ幅を変更 */
+	    </style>
+	</th:block>
+
+    <th:block layout:fragment="layout-body">
+		<div class="row">
+		    <h4>現在このアプリは利用できません。</h4>
+		    <p>ヘルプデスクにご連絡いただき、復旧までお待ちください。</p>
+		</div>
+	</th:block>
+</div>
+
+

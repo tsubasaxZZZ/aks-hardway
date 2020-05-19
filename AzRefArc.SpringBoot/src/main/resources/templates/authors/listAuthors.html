@@ -1,0 +1,37 @@
+﻿
+<div layout:decorator="layout">
+    <th:block layout:fragment="layout-body">
+		<div class="table-responsive">
+			<h4>編集対象となる著者を選択してください。</h4>
+		
+            <table class="table table-condensed table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>著者ID</th>
+                        <th>著者名</th>
+                        <th>電話番号</th>
+                        <th>州</th>
+                        <th>契約有無</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                        <tr th:each="obj:${authors}">
+                            <td><a th:href="@{'/authors/editAuthor/' + ${obj.AuthorId}}" th:text="${obj.AuthorId}"></a></td>
+                            <td th:text="${obj.AuthorFirstName} + ' ' + ${obj.AuthorLastName}"></td>
+                            <td th:text="${obj.Phone}"></td>
+                            <td th:text="${obj.State}"></td>
+                            <td><input type="checkbox" disabled th:checked="${obj.Contract}"　th:text="${obj.Contract} ? ' 契約あり' : ' 契約なし'"　/></td>
+                            <td><a th:href="@{'/authors/editAuthor/' + ${obj.AuthorId}}">編集</a></td>
+                        </tr>
+                </tbody>
+            </table>
+        </div>
+
+		<p>
+		    <a href="/">業務メニューに戻る</a>
+		</p>
+	</th:block>
+</div>
+
+

@@ -1,0 +1,45 @@
+﻿<div layout:decorator="layout">
+    <th:block layout:fragment="layout-styles">
+	    <style type="text/css">
+	        div.row ul {
+	            padding-left: 30px
+	        }
+	            /* 箇条書きの字下げ幅を変更 */
+	            div.row ul ul {
+	                padding-left: 20px
+	            }
+	        /* 箇条書きの字下げ幅を変更 */
+	    </style>
+	</th:block>
+
+    <th:block layout:fragment="layout-body">
+		<div class="row">
+		    <img src="/images/banner.png" class="img-responsive" style="margin: 0 auto;" />
+		</div>
+		<div class="row">
+			<h3>Spring Boot による業務サンプルアプリケーション V2</h3>
+		
+		    <h4><span class="glyphicon glyphicon-cloud"></span>&nbsp;データベースアプリケーション</h4>
+		    <ul>
+		        <li><a href="/authors/filterByCondition">著者データの検索</a></li>
+		        <li><a href="/authors/listAuthors">著者データの編集</a></li>
+		    </ul>
+		</div>
+		
+		<div class="row">
+		    <h4>本サンプルプログラムに関するご注意</h4>
+		    <ul>
+			    <li>
+				        本サンプルアプリケーションは、jQuery, Bootstrap などを利用しています。
+				        これらのライブラリが正しく組み込まれていない場合には一部あるいはすべてのアプリケーションが正しく動作しませんので、ご注意ください。
+			    </li>
+			    <li>
+			    	本サンプルアプリケーションは Java (Spring Boot) を用いて開発されています。
+			    </li>
+		    </ul>
+		</div>
+				
+	</th:block>
+</div>
+
+
